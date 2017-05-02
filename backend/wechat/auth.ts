@@ -1,9 +1,9 @@
-var sha1 = require('sha1');
-var request = require('request');
+import { sha1 } from 'sha1';
+import { request } from 'request';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
-module.exports.weChatClass = class weChat {
+export class WeChat {
   constructor(options) {
     this.appId = options.appId;
     this.appSecret = options.appSecret;
