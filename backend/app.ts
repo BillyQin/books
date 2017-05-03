@@ -20,7 +20,7 @@ var config = {
   }
 }
 
-//let weChatConfig = new WeChat.weChatClass(config.weChat);
+let weChatConfig = new WeChat(config.weChat);
 app.use(WeChat.serverConfig(config.weChat));
 
 app.listen(80);
