@@ -2,7 +2,7 @@ import { Koa } from 'koa';
 import { WeChat } from './wechat/auth';
 import { readFileAsync, writeFileAsync } from './wechat/libs/utils';
 
-var app = new Koa();
+const app = new Koa();
 
 const weChatFile = './wechat/config/config.txt';
 var config = {
@@ -21,6 +21,6 @@ var config = {
 }
 
 let weChatConfig = new WeChat(config.weChat);
-app.use(WeChat.serverConfig(config.weChat));
+app.use(weChatConfig.serverConfig(config.weChat));
 
 app.listen(80);

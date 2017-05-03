@@ -4,6 +4,13 @@ import { request } from 'request';
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
 export class WeChat {
+  appId: string = '';
+  appSecret: string = '';
+  getAccessToken: any;
+  saveAccessToken: any;
+  accessToken: string = '';
+  expiresIn: string = '';
+
   constructor(options) {
     this.appId = options.appId;
     this.appSecret = options.appSecret;
@@ -13,9 +20,9 @@ export class WeChat {
     this.getAccessToken() 
     .then(data => {
       if (this.isValidAccessToken(data)) {
-        resolve(data);
+        return data;
       } else {
-        return this.updateAccessToken(data);
+        this.updateAccessToken();
       }
     })
     .then(data => {
@@ -57,10 +64,10 @@ export class WeChat {
         }
       })
     })
-    .then(r => {
-      let data = JSON.parse(r.body);
+    .then((response:any) => {
+      let data = JSON.parse(response.body);
       let now = new Date().getTime();
-      let expiresIn = now + (r.body.expires_in - 20) * 1000;
+      let expiresIn = now + (response.body.expires_in - 20) * 1000;
       data.expires_in = expiresIn;
       this.saveAccessToken(data);
       return data;
