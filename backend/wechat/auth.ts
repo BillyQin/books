@@ -1,5 +1,5 @@
-import { sha1 } from 'sha1';
-import { request } from 'request';
+import * as sha1 from 'sha1';
+import * as request from 'request';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
@@ -18,14 +18,15 @@ export class WeChat {
     this.saveAccessToken = options.saveAccessToken;
 
     this.getAccessToken()
-    .then(data => {
+    .then(value => {
+      let data = JSON.parse(value);
       if (this.isValidAccessToken(data)) {
         return data;
       } else {
-        this.updateAccessToken();
+        return this.updateAccessToken();
       }
     })
-    .then(data => {
+    .then((data:any) => {
       this.accessToken = data.access_token;
       this.expiresIn = data.expires_in;
     })
@@ -34,7 +35,7 @@ export class WeChat {
     });
   }
 
-  isValidAccessToken(data) {
+  isValidAccessToken(data:any) {
     if (!data || !data.access_token || !data.expires_in) {
       return false;
     }
@@ -65,7 +66,7 @@ export class WeChat {
     .then((response:any) => {
       let data = JSON.parse(response.body);
       let now = new Date().getTime();
-      let expiresIn = now + (response.body.expires_in - 20) * 1000;
+      let expiresIn = now + (data.expires_in - 20) * 1000;
       data.expires_in = expiresIn;
       this.saveAccessToken(data);
       return data;

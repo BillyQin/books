@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 
-export function readFileAsync(fpath): Promise<any>{
+export function readFileAsync(fpath,encoding): Promise<any>{
   return new Promise((resolve, reject)=>{
-    fs.readFile(fpath, (err, data)=>{
+    fs.readFile(fpath, encoding, (err, data)=>{
       if (err) {
         reject(err);
       } else {
