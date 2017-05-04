@@ -17,7 +17,7 @@ export class WeChat {
     this.getAccessToken = options.getAccessToken;
     this.saveAccessToken = options.saveAccessToken;
 
-    this.getAccessToken() 
+    this.getAccessToken()
     .then(data => {
       if (this.isValidAccessToken(data)) {
         return data;
@@ -27,7 +27,7 @@ export class WeChat {
     })
     .then(data => {
       this.accessToken = data.access_token;
-      this.expiresIn = data.expires_in;   
+      this.expiresIn = data.expires_in;
     })
     .catch(err=>{
       console.log(err);
@@ -51,9 +51,7 @@ export class WeChat {
   }
 
   updateAccessToken() {
-    let appId = this.appId;
-    let appSecret = this.appSecret;
-    let url = `${prefix}token?grant_type=client_credential&appid=${appId}&secret=${appSecret}`;
+    let url = `${prefix}token?grant_type=client_credential&appid=${this.appId}&secret=${this.appSecret}`;
 
     return new Promise((resolve, reject) => {
       request(url, (error, response) => {
@@ -87,8 +85,8 @@ export class WeChat {
       if (sha === signature && this.method === 'GET') {
         this.body = echostr;
       } else if (sha === signature && this.method === 'POST') {
-        console.log(this.request.body); 
+        console.log(this.request.body);
       }
-    } 
+    }
   }
 }

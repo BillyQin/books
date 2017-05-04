@@ -1,8 +1,8 @@
-import { Koa } from 'koa';
+import * as koa from 'koa';
 import { WeChat } from './wechat/auth';
 import { readFileAsync, writeFileAsync } from './wechat/libs/utils';
 
-const app = new Koa();
+const app = new koa();
 
 const weChatFile = './wechat/config/config.txt';
 var config = {
