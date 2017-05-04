@@ -1,5 +1,6 @@
 import * as sha1 from 'sha1';
 import * as request from 'request';
+import { parseString } from 'xml2js';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
@@ -29,6 +30,20 @@ export class WeChat {
     .then((data:any) => {
       this.accessToken = data.access_token;
       this.expiresIn = data.expires_in;
+    })
+    .then(()=>{
+      let url = `${prefix}get_current_autoreply_info?access_token=${this.accessToken}`
+
+      return new Promise((resolve, reject) => {
+        request(url, (error, response) => {
+          if(!error && response.statusCode === 200){
+            //console.log(response.body);
+            resolve(response.body);
+          } else {
+            reject(error);
+          }
+        })
+      })
     })
     .catch(err=>{
       console.log(err);
@@ -86,7 +101,13 @@ export class WeChat {
       if (sha === signature && this.method === 'GET') {
         this.body = echostr;
       } else if (sha === signature && this.method === 'POST') {
-        console.log(this.request.body);
+        console.log(this.req);
+        parseString(this.request.body, (err, result)=>{
+          let body = JSON.stringify(result);
+          console.log(body);
+        })
+        this.response.body = '';
+        this.response.state = 200;
       }
     }
   }
