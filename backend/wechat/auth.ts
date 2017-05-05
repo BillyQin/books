@@ -1,5 +1,7 @@
 import * as sha1 from 'sha1';
 import * as request from 'request';
+import * as getRawBody from 'raw-body';
+import * as contentType  from 'content-type';
 import { parseString } from 'xml2js';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
@@ -101,11 +103,15 @@ export class WeChat {
       if (sha === signature && this.method === 'GET') {
         this.body = echostr;
       } else if (sha === signature && this.method === 'POST') {
-        console.log(this.req);
-        parseString(this.request.body, (err, result)=>{
-          let body = JSON.stringify(result);
-          console.log(body);
+        let body = getRawBody(this.req, {
+          length: this.req.headers['content-length'],
+          limit: '1mb',
+          encoding: contentType.parse(this.req).parameters.charset
         })
+        .then((buffer)=>{
+          let context = buffer.toString();
+          console.log(context);
+        });
         this.response.body = '';
         this.response.state = 200;
       }
