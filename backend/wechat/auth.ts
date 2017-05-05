@@ -39,7 +39,6 @@ export class WeChat {
       return new Promise((resolve, reject) => {
         request(url, (error, response) => {
           if(!error && response.statusCode === 200){
-            //console.log(response.body);
             resolve(response.body);
           } else {
             reject(error);
@@ -94,27 +93,53 @@ export class WeChat {
   }
 
   serverConfig(options) {
-    return function *(next){
+    return async (ctx, next)=>{
       let token = options.token;
-      let {signature, timestamp, nonce, echostr} = this.query;
+      let {signature, timestamp, nonce, echostr} = ctx.query;
       let strList = [token, timestamp, nonce].sort().join('');
       let sha = sha1(strList);
 
-      if (sha === signature && this.method === 'GET') {
-        this.body = echostr;
-      } else if (sha === signature && this.method === 'POST') {
-        let body = getRawBody(this.req, {
-          length: this.req.headers['content-length'],
-          limit: '1mb',
-          encoding: contentType.parse(this.req).parameters.charset
-        })
-        .then((buffer)=>{
-          let context = buffer.toString();
-          console.log(context);
-        });
-        this.response.body = '';
-        this.response.state = 200;
-      }
+      if (sha === signature && ctx.method === 'GET') {
+        ctx.body = echostr;
+      } else if (sha === signature && ctx.method === 'POST') {
+          let buffer = await getRawBody(ctx.req, {
+            length: ctx.req.headers['content-length'],
+            limit: '1mb',
+            encoding: contentType.parse(ctx.req).parameters.charset
+          });
+
+          await function(buffer){
+            let xml = buffer.toString();
+            console.log(xml);
+            return new Promise((resolve, reject)=>{
+              parseString(xml, (err, result)=>{
+                if(err){
+                  reject;
+                } else {
+                  resolve(result.xml);
+                }
+              })
+            })
+            .then((data:any)=>{
+              console.log("zfdsfsdfdsffdasfas\n");
+              let message =
+              `<xml>
+                <ToUserName><![CDATA[${data.ToUserName[0]}]]></ToUserName>
+                <FromUserName><![CDATA[${data.FromUserName[0]}]]></FromUserName>
+                <CreateTime>${Date.now()}</CreateTime>
+                <MsgType><![CDATA[${data.MsgType[0]}]]></MsgType>
+                <Content><![CDATA[你好]]></Content>
+              </xml>`.replace(/[\r\n\s+]/g,'').trim();
+              console.log(message);
+              // ctx.response.state = 200;
+              // ctx.response.body = message;
+              ctx.res.setHeader('Content-Type', 'application/xml');
+              ctx.res.end(message);
+            });
+          };
+        };
     }
+      // ctx.response.state = 200;
+      // ctx.response.body = '';
   }
 }
