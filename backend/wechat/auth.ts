@@ -2,7 +2,8 @@ import * as sha1 from 'sha1';
 import * as request from 'request';
 import * as getRawBody from 'raw-body';
 import * as contentType  from 'content-type';
-import { readFileAsync, writeFileAsync } from './libs/utils';
+import { parseString } from 'xml2js';
+
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
@@ -92,6 +93,7 @@ export class WeChat {
     });
   }
 
+
   // serverConfig(Config) {
   //   return async (ctx, next)=>{
   //     let token = Config.token;
@@ -157,4 +159,57 @@ export function Auth(){
     }
     next();
   }
+}
+
+  // serverConfig(options) {
+  //   return async (ctx, next)=>{
+  //     let token = options.token;
+  //     let {signature, timestamp, nonce, echostr} = ctx.query;
+  //     let strList = [token, timestamp, nonce].sort().join('');
+  //     let sha = sha1(strList);
+
+  //     if (sha === signature && ctx.method === 'GET') {
+  //       ctx.body = echostr;
+  //     } else if (sha === signature && ctx.method === 'POST') {
+  //         let buffer = await getRawBody(ctx.req, {
+  //           length: ctx.req.headers['content-length'],
+  //           limit: '1mb',
+  //           encoding: contentType.parse(ctx.req).parameters.charset
+  //         });
+
+  //         await function(buffer){
+  //           let xml = buffer.toString();
+  //           console.log(xml);
+  //           return new Promise((resolve, reject)=>{
+  //             parseString(xml, (err, result)=>{
+  //               if(err){
+  //                 reject;
+  //               } else {
+  //                 resolve(result.xml);
+  //               }
+  //             })
+  //           })
+  //           .then((data:any)=>{
+  //             console.log("zfdsfsdfdsffdasfas\n");
+  //             let message =
+  //             `<xml>
+  //               <ToUserName><![CDATA[${data.ToUserName[0]}]]></ToUserName>
+  //               <FromUserName><![CDATA[${data.FromUserName[0]}]]></FromUserName>
+  //               <CreateTime>${Date.now()}</CreateTime>
+  //               <MsgType><![CDATA[${data.MsgType[0]}]]></MsgType>
+  //               <Content><![CDATA[你好]]></Content>
+  //             </xml>`.replace(/[\r\n\s+]/g,'').trim();
+  //             console.log(message);
+  //             // ctx.response.state = 200;
+  //             // ctx.response.body = message;
+  //             ctx.res.setHeader('Content-Type', 'application/xml');
+  //             ctx.res.end(message);
+  //           });
+  //         };
+  //       };
+  //   }
+  //     // ctx.response.state = 200;
+  //     // ctx.response.body = '';
+
+  // }
 }
