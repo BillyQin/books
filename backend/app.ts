@@ -1,26 +1,12 @@
 import * as koa from 'koa';
-import { WeChat } from './wechat/auth';
-import { readFileAsync, writeFileAsync } from './wechat/libs/utils';
+import * as Router from 'koa-router';
+import { WeChat, Auth } from './wechat/auth';
 
-const app = new koa();
+import { Config } from './wechat/config';
+let app = new koa();
+let router = new Router();
 
-const weChatFile = `${__dirname}/../config.txt`;
-var config = {
-  'weChat': {
-    appId: 'wxbc375822c4ff144e',
-    appSecret: '39a6a96e7068ce05c35092819b2481c7',
-    token: 'loveMovieIn20170428',
-    getAccessToken: () => {
-      return readFileAsync(weChatFile,'utf-8');
-    },
-    saveAccessToken: (data) => {
-      data = JSON.stringify(data);
-      return writeFileAsync(weChatFile, data);
-    },
-  }
-}
-
-let weChatConfig = new WeChat(config.weChat);
-app.use(weChatConfig.serverConfig(config.weChat));
+router.get('/', Auth());
+app.use(new WeChat(Config));
 
 app.listen(80);

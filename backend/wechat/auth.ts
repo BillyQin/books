@@ -1,22 +1,24 @@
 import * as sha1 from 'sha1';
 import * as request from 'request';
-import { parseString } from 'xml2js';
+import * as getRawBody from 'raw-body';
+import * as contentType  from 'content-type';
+import { readFileAsync, writeFileAsync } from './libs/utils';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
 export class WeChat {
-  appId: string = '';
-  appSecret: string = '';
+  appId: any;
+  appSecret: any;
   getAccessToken: any;
   saveAccessToken: any;
-  accessToken: string = '';
-  expiresIn: string = '';
+  accessToken: any = '';
+  expiresIn: any = '';
 
-  constructor(options) {
-    this.appId = options.appId;
-    this.appSecret = options.appSecret;
-    this.getAccessToken = options.getAccessToken;
-    this.saveAccessToken = options.saveAccessToken;
+  constructor(config) {
+    this.appId = config.appId;
+    this.appSecret = config.appSecret;
+    this.getAccessToken = readFileAsync;
+    this.saveAccessToken = writeFileAsync;
 
     this.getAccessToken()
     .then(value => {
@@ -37,7 +39,6 @@ export class WeChat {
       return new Promise((resolve, reject) => {
         request(url, (error, response) => {
           if(!error && response.statusCode === 200){
-            //console.log(response.body);
             resolve(response.body);
           } else {
             reject(error);
@@ -91,24 +92,69 @@ export class WeChat {
     });
   }
 
-  serverConfig(options) {
-    return function *(next){
-      let token = options.token;
-      let {signature, timestamp, nonce, echostr} = this.query;
-      let strList = [token, timestamp, nonce].sort().join('');
-      let sha = sha1(strList);
+  // serverConfig(Config) {
+  //   return async (ctx, next)=>{
+  //     let token = Config.token;
+  //     let {signature, timestamp, nonce, echostr} = ctx.query;
+  //     let strList = [token, timestamp, nonce].sort().join('');
+  //     let sha = sha1(strList);
 
-      if (sha === signature && this.method === 'GET') {
-        this.body = echostr;
-      } else if (sha === signature && this.method === 'POST') {
-        console.log(this.req);
-        parseString(this.request.body, (err, result)=>{
-          let body = JSON.stringify(result);
-          console.log(body);
-        })
-        this.response.body = '';
-        this.response.state = 200;
-      }
+  //     if (sha === signature && ctx.method === 'GET') {
+  //       ctx.body = echostr;
+  //     } else if (sha === signature && ctx.method === 'POST') {
+  //         let buffer = await getRawBody(ctx.req, {
+  //           length: ctx.req.headers['content-length'],
+  //           limit: '1mb',
+  //           encoding: contentType.parse(ctx.req).parameters.charset
+  //         });
+
+  //         await function(buffer){
+  //           let xml = buffer.toString();
+  //           console.log(xml);
+  //           return new Promise((resolve, reject)=>{
+  //             parseString(xml, (err, result)=>{
+  //               if(err){
+  //                 reject;
+  //               } else {
+  //                 resolve(result.xml);
+  //               }
+  //             })
+  //           })
+  //           .then((data:any)=>{
+  //             console.log("zfdsfsdfdsffdasfas\n");
+  //             let message =
+  //             `<xml>
+  //               <ToUserName><![CDATA[${data.ToUserName[0]}]]></ToUserName>
+  //               <FromUserName><![CDATA[${data.FromUserName[0]}]]></FromUserName>
+  //               <CreateTime>${Date.now()}</CreateTime>
+  //               <MsgType><![CDATA[${data.MsgType[0]}]]></MsgType>
+  //               <Content><![CDATA[你好]]></Content>
+  //             </xml>`.replace(/[\r\n\s+]/g,'').trim();
+  //             console.log(message);
+  //             // ctx.response.state = 200;
+  //             // ctx.response.body = message;
+  //             ctx.res.setHeader('Content-Type', 'application/xml');
+  //             ctx.res.end(message);
+  //           });
+  //         };
+  //       };
+  //   }
+  //     // ctx.response.state = 200;
+  //     // ctx.response.body = '';
+  // }
+}
+
+export function Auth(){
+  //let token = Config.token;
+  let token = 'dsfs';
+  return async (ctx, next)=>{
+    let {signature, timestamp, nonce, echostr} = ctx.query;
+    let strList = [token, timestamp, nonce].sort().join('');
+    let sha = sha1(strList);
+    console.log('auth');
+    if (sha === signature) {
+      ctx.body = echostr;
     }
+    next();
   }
 }
