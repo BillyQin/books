@@ -4,7 +4,7 @@ import * as getRawBody from 'raw-body';
 import * as contentType  from 'content-type';
 import { parseString } from 'xml2js';
 import { readFileAsync, writeFileAsync } from './libs/file';
-import { Config } from './config';
+import { config } from './config';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
@@ -16,8 +16,8 @@ export class WeChat {
   weChatFile:string = `${__dirname}/config/config.txt`;
 
   constructor() {
-    this.appId = new Config().appId;
-    this.appSecret = new Config().appSecret;
+    this.appId = config.appId;
+    this.appSecret = config.appSecret;
 
     readFileAsync(this.weChatFile, 'utf8')
     .then(value => {
@@ -143,7 +143,7 @@ export class WeChat {
 
 export function Auth(){
   return async (ctx, next)=>{
-    let token = new Config().token;
+    let token = config.token;
     console.log(token);
     let {signature, timestamp, nonce, echostr} = ctx.query;
     let strList = [token, timestamp, nonce].sort().join('');
