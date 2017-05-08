@@ -14,7 +14,7 @@ export function readFileAsync(fpath,encoding): Promise<any>{
 
 export function writeFileAsync(fpath, data): Promise<any>{
   return new Promise((resolve, reject)=>{
-    fs.writeFile(fpath, data, (err, data)=>{
+    fs.writeFile(fpath, data, (err)=>{
       if (err) {
         reject(err);
       } else {

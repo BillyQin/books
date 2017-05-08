@@ -3,38 +3,33 @@ import * as request from 'request';
 import * as getRawBody from 'raw-body';
 import * as contentType  from 'content-type';
 import { parseString } from 'xml2js';
-
+import { readFileAsync, writeFileAsync } from './libs/file';
+import { Config } from './config';
 
 const prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
 export class WeChat {
-  appId: any;
-  appSecret: any;
-  getAccessToken: any;
-  saveAccessToken: any;
-  accessToken: any = '';
-  expiresIn: any = '';
+  appId: string = '';
+  appSecret: string = '';
+  accessToken: string = '';
+  expiresIn: string = '';
+  weChatFile:string = `${__dirname}/config/config.txt`;
 
-  constructor(config) {
-    this.appId = config.appId;
-    this.appSecret = config.appSecret;
-    this.getAccessToken = readFileAsync;
-    this.saveAccessToken = writeFileAsync;
+  constructor() {
+    this.appId = new Config().appId;
+    this.appSecret = new Config().appSecret;
 
-    this.getAccessToken()
+    readFileAsync(this.weChatFile, 'utf8')
     .then(value => {
-      let data = JSON.parse(value);
-      if (this.isValidAccessToken(data)) {
-        return data;
+      if (this.isValidAccessToken(value)) {
+        return value;
       } else {
         return this.updateAccessToken();
       }
     })
-    .then((data:any) => {
+    .then((data:any)=>{
       this.accessToken = data.access_token;
       this.expiresIn = data.expires_in;
-    })
-    .then(()=>{
       let url = `${prefix}get_current_autoreply_info?access_token=${this.accessToken}`
 
       return new Promise((resolve, reject) => {
@@ -85,7 +80,7 @@ export class WeChat {
       let now = new Date().getTime();
       let expiresIn = now + (data.expires_in - 20) * 1000;
       data.expires_in = expiresIn;
-      this.saveAccessToken(data);
+      writeFileAsync(this.weChatFile, JSON.stringify(data));
       return data;
     })
     .catch(err=>{
@@ -147,9 +142,9 @@ export class WeChat {
 }
 
 export function Auth(){
-  //let token = Config.token;
-  let token = 'dsfs';
   return async (ctx, next)=>{
+    let token = new Config().token;
+    console.log(token);
     let {signature, timestamp, nonce, echostr} = ctx.query;
     let strList = [token, timestamp, nonce].sort().join('');
     let sha = sha1(strList);
@@ -212,4 +207,4 @@ export function Auth(){
   //     // ctx.response.body = '';
 
   // }
-}
+//}
